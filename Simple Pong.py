@@ -1,5 +1,13 @@
-from Tkinter import *
 import random
+
+try:
+    from Tkinter import *  # Python 2
+except ImportError:
+    try:
+        from tkinter import *  # Python 3
+    except ImportError:
+        raise ImportError("This program requires Tkinter, please make sure you have it installed.")
+
 
 # Constants
 WIDTH = 800
@@ -14,6 +22,7 @@ LEFT = False
 RIGHT = True
 INFO_STRING = "Use W/S to move up/down.\nPress Space to pause.\nPress Esc once to start a new game, twice to quit."
 INFO_STRING_PAUSED = "Press Space to unpause.\nPress Esc to quit."
+
 
 def pause(event):
     global running, canvas, info_display
@@ -146,7 +155,7 @@ def restart(event):
 
 def gameloop():
     global root, canvas, ball_center, ball, paddle1_pos, paddle2_pos, paddle1, paddle2, running
-    root.after(1000 / 60, gameloop)
+    root.after(1000 // 60, gameloop)
     if running:
         update_paddles()
         update_ball()
@@ -156,6 +165,11 @@ def gameloop():
 # Initializations
 root = Tk()
 root.title("Simple Pong")
+
+# place game window in a nice position on screen
+screen_width = root.winfo_screenwidth()
+screen_height = root.winfo_screenheight()
+root.geometry("+" + str(screen_width // 4) + "+" + str(screen_height // 4))  # using only offsets from left and top
 
 canvas = Canvas(root, width=WIDTH, height= HEIGHT, bg="black")
 canvas.pack()
