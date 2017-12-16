@@ -24,6 +24,8 @@ INFO_STRING = "Use W/S to move up/down.\nPress Space to pause.\nPress Esc once t
 INFO_STRING_PAUSED = "Press Space to unpause.\nPress Esc to quit."
 
 
+# Function definitions
+
 def pause(event):
     global running, canvas, info_display
     running = not running
@@ -34,7 +36,7 @@ def pause(event):
 
 
 def keydown(event):
-    global paddle1_vel, paddle2_vel, paddle1_pos
+    global paddle1_vel
     if event.char == "w":
         paddle1_vel = -PADDLE_STEP
     elif event.char == "s":
@@ -45,6 +47,7 @@ def update_ball():
     global ball_center, ball_vel, canvas, ball
     ball_center[0] += ball_vel[0]
     ball_center[1] += ball_vel[1]
+    # ball has reached top or bottom of the field, must reflect
     if ((ball_center[1] + BALL_RADIUS) >= HEIGHT) or ((ball_center[1] - BALL_RADIUS) <= 0):
         ball_vel[1] *= -1
     canvas.coords(ball, ball_center[0] - BALL_RADIUS, ball_center[1] - BALL_RADIUS, ball_center[0] + BALL_RADIUS, ball_center[1] + BALL_RADIUS)
@@ -59,7 +62,7 @@ def update_paddles():
         canvas.coords(paddle1, HALF_PAD_WIDTH, paddle1_pos - HALF_PAD_HEIGHT, HALF_PAD_WIDTH, paddle1_pos + HALF_PAD_HEIGHT)
     paddle1_vel = 0
 
-    ### AI SIMULATION FOR PADDLE 2 ###
+    ### COMPUTER MOVEMENT DECICION ###
     if ball_vel[0] > 0:
         if ball_center[1] > paddle2_pos and ball_vel[1] > 0:
             paddle2_vel = PADDLE_STEP * 0.6
@@ -71,7 +74,7 @@ def update_paddles():
                 paddle2_vel = PADDLE_STEP * 0.6
             elif ball_center[1] < (paddle2_pos - HALF_PAD_HEIGHT):
                 paddle2_vel = -PADDLE_STEP * 0.6
-    ### END AI SIMULATION PADDLE 2 ###
+    ### END COMPUTER MOVEMENT DECICION ###
 
     new_paddle2_pos = paddle2_pos + paddle2_vel
     if new_paddle2_pos - HALF_PAD_HEIGHT >= 0 and new_paddle2_pos + HALF_PAD_HEIGHT <= HEIGHT:
@@ -80,8 +83,25 @@ def update_paddles():
     paddle2_vel = 0
 
 
+def update_scores_display():
+    global score1, score2, score1display, score2display, color_winning, color_losing, color_draw
+    canvas.itemconfigure(score1display, text=str(score1))
+    canvas.itemconfigure(score2display, text=str(score2))
+    if score1 > score2:
+        canvas.itemconfigure(score1display, fill=color_winning)
+        canvas.itemconfigure(score2display, fill=color_losing)
+    elif score1 < score2:
+        canvas.itemconfigure(score1display, fill=color_losing)
+        canvas.itemconfigure(score2display, fill=color_winning)
+    else:
+        canvas.itemconfigure(score1display, fill=color_draw)
+        canvas.itemconfigure(score2display, fill=color_draw)
+
+
 def check_collision():
     global ball_center, ball_vel, paddle1_pos, paddle2_pos, canvas, ball, paddle1, paddle2, score1, score2, score1display, score2display
+
+    # ball has reached left (player) side of field
     if (ball_center[0] - BALL_RADIUS) <= PAD_WIDTH:
         if (ball_center[1] >= (paddle1_pos - HALF_PAD_HEIGHT)) and (ball_center[1] <= (paddle1_pos + HALF_PAD_HEIGHT)):
             ball_vel[0] *= -1.0
@@ -95,8 +115,10 @@ def check_collision():
                 ball_vel[1] += 0.5
         else:
             score2 += 1
-            canvas.itemconfigure(score2display, text=str(score2))
+            update_scores_display()
             spawn_ball(RIGHT)
+
+    # ball has reached right (computer) side of field
     elif (ball_center[0] + BALL_RADIUS) >= (WIDTH - PAD_WIDTH):
         if (ball_center[1] >= (paddle2_pos - HALF_PAD_HEIGHT)) and (ball_center[1] <= (paddle2_pos + HALF_PAD_HEIGHT)):
             ball_vel[0] *= -1.0
@@ -110,7 +132,7 @@ def check_collision():
                 ball_vel[1] += 0.5
         else:
             score1 += 1
-            canvas.itemconfigure(score1display, text=str(score1))
+            update_scores_display()
             spawn_ball(LEFT)
 
 
@@ -133,11 +155,10 @@ def new_game():
     paddle1_vel = 0
     paddle2_vel = 0
     score1 = 0
-    canvas.itemconfigure(score1display, text=str(score1))
     score2 = 0
-    canvas.itemconfigure(score2display, text=str(score2))
+    update_scores_display()
     spawn_ball(RIGHT)
-    running = False
+    running = False  # Game starts paused to give player time to prepare
     canvas.itemconfigure(info_display, text=INFO_STRING_PAUSED)
 
 
@@ -150,7 +171,7 @@ def restart(event):
 
 
 def gameloop():
-    global root, canvas, ball_center, ball, paddle1_pos, paddle2_pos, paddle1, paddle2, running
+    global root, running
     root.after(1000 // 60, gameloop)
     if running:
         update_paddles()
@@ -162,18 +183,34 @@ def gameloop():
 root = Tk()
 root.title("Simple Pong")
 
+# useful variables
+color_winning = "green"
+color_losing = "red"
+color_draw = "white"
+
 # place game window in a nice position on screen
 screen_width = root.winfo_screenwidth()
 screen_height = root.winfo_screenheight()
 root.geometry("+" + str(screen_width // 4) + "+" + str(screen_height // 4))  # using only offsets from left and top
 
-canvas = Canvas(root, width=WIDTH, height= HEIGHT, bg="black")
+# Canvas / Field
+canvas = Canvas(root, width=WIDTH, height=HEIGHT, bg="black")
 canvas.pack()
 
 # Field lines
 canvas.create_line(WIDTH / 2, 0, WIDTH / 2, HEIGHT, fill="white")
 canvas.create_line(PAD_WIDTH, 0, PAD_WIDTH, HEIGHT, fill="white")
 canvas.create_line(WIDTH - PAD_WIDTH, 0, WIDTH-PAD_WIDTH, HEIGHT, fill="white")
+
+# Scores
+score1 = 0
+score2 = 0
+
+score1display = canvas.create_text(WIDTH / 4, HEIGHT / 4, text=str(score1), fill=color_draw, font=('Helvetica', '30'))
+score2display = canvas.create_text(WIDTH * 3/ 4, HEIGHT / 4, text=str(score2), fill=color_draw, font=('Helvetica', '30'))
+
+# Info
+info_display = canvas.create_text(WIDTH / 4, HEIGHT - 25, text=INFO_STRING, fill="white", font=('Helvetica', '10'))
 
 # Ball
 ball_center = [WIDTH / 2, HEIGHT / 2]
@@ -188,19 +225,10 @@ paddle2_vel = 0
 paddle1 = canvas.create_line(HALF_PAD_WIDTH, paddle1_pos - HALF_PAD_HEIGHT, HALF_PAD_WIDTH, paddle1_pos + HALF_PAD_HEIGHT, fill="white", width = PAD_WIDTH)
 paddle2 = canvas.create_line(WIDTH - HALF_PAD_WIDTH, paddle2_pos - HALF_PAD_HEIGHT, WIDTH - HALF_PAD_WIDTH, paddle2_pos + HALF_PAD_HEIGHT, fill="white", width=PAD_WIDTH)
 
-# Scores
-score1 = 0
-score2 = 0
-
-score1display = canvas.create_text(WIDTH / 4, HEIGHT / 4, text=str(score1), fill="white", font=('Helvetica', '30'))
-score2display = canvas.create_text(WIDTH * 3/ 4, HEIGHT / 4, text=str(score2), fill="white", font=('Helvetica', '30'))
-
-info_display = canvas.create_text(WIDTH / 4, HEIGHT - 25, text=INFO_STRING, fill="white", font=('Helvetica', '10'))
-
 # Game control
 running = False
 
-
+# User input
 root.bind('<Key>', keydown)
 root.bind('<space>', pause)
 root.bind('<Escape>', restart)
