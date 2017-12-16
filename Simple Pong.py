@@ -39,10 +39,6 @@ def keydown(event):
         paddle1_vel = -PADDLE_STEP
     elif event.char == "s":
         paddle1_vel = PADDLE_STEP
-    if event.keysym == "Up":
-        paddle2_vel = -PADDLE_STEP
-    elif event.keysym == "Down":
-        paddle2_vel = PADDLE_STEP
 
 
 def update_ball():
