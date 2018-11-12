@@ -181,7 +181,7 @@ def gameloop():
 
 # Initializations
 root = Tk()
-root.title("Simple Pong")
+root.title("PyPong")
 
 # useful variables
 color_winning = "green"
