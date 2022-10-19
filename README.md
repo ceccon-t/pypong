@@ -1,4 +1,4 @@
-# pypong
+# PyPong
 
 ![Game paused](https://raw.githubusercontent.com/ceccon-t/pypong/main/images/Py-Pong-Sc0.png "Game paused")
 
