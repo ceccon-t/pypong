@@ -10,3 +10,8 @@ LEFT = False
 RIGHT = True
 INFO_STRING = "Use W/S to move up/down.\nPress Space to pause.\nPress Esc once to start a new game, twice to quit."
 INFO_STRING_PAUSED = "Press Space to unpause.\nPress Esc to quit."
+
+COLOR_WINNING = "green"
+COLOR_LOSING = "red"
+COLOR_DRAW = "white"
+

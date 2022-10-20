@@ -71,18 +71,18 @@ def update_paddles():
 
 
 def update_scores_display():
-    global score1, score2, score1display, score2display, color_winning, color_losing, color_draw
+    global score1, score2, score1display, score2display
     canvas.itemconfigure(score1display, text=str(score1))
     canvas.itemconfigure(score2display, text=str(score2))
     if score1 > score2:
-        canvas.itemconfigure(score1display, fill=color_winning)
-        canvas.itemconfigure(score2display, fill=color_losing)
+        canvas.itemconfigure(score1display, fill=COLOR_WINNING)
+        canvas.itemconfigure(score2display, fill=COLOR_LOSING)
     elif score1 < score2:
-        canvas.itemconfigure(score1display, fill=color_losing)
-        canvas.itemconfigure(score2display, fill=color_winning)
+        canvas.itemconfigure(score1display, fill=COLOR_LOSING)
+        canvas.itemconfigure(score2display, fill=COLOR_WINNING)
     else:
-        canvas.itemconfigure(score1display, fill=color_draw)
-        canvas.itemconfigure(score2display, fill=color_draw)
+        canvas.itemconfigure(score1display, fill=COLOR_DRAW)
+        canvas.itemconfigure(score2display, fill=COLOR_DRAW)
 
 
 def check_collision():
@@ -170,11 +170,6 @@ def gameloop():
 root = Tk()
 root.title("PyPong")
 
-# useful variables
-color_winning = "green"
-color_losing = "red"
-color_draw = "white"
-
 # place game window in a nice position on screen
 screen_width = root.winfo_screenwidth()
 screen_height = root.winfo_screenheight()
@@ -193,8 +188,8 @@ canvas.create_line(WIDTH - PAD_WIDTH, 0, WIDTH-PAD_WIDTH, HEIGHT, fill="white")
 score1 = 0
 score2 = 0
 
-score1display = canvas.create_text(WIDTH / 4, HEIGHT / 4, text=str(score1), fill=color_draw, font=('Helvetica', '30'))
-score2display = canvas.create_text(WIDTH * 3/ 4, HEIGHT / 4, text=str(score2), fill=color_draw, font=('Helvetica', '30'))
+score1display = canvas.create_text(WIDTH / 4, HEIGHT / 4, text=str(score1), fill=COLOR_DRAW, font=('Helvetica', '30'))
+score2display = canvas.create_text(WIDTH * 3/ 4, HEIGHT / 4, text=str(score2), fill=COLOR_DRAW, font=('Helvetica', '30'))
 
 # Info
 info_display = canvas.create_text(WIDTH / 4, HEIGHT - 25, text=INFO_STRING, fill="white", font=('Helvetica', '10'))
