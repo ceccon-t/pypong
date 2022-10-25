@@ -12,6 +12,9 @@ import random
 # Constants
 from GameConstants import *
 
+
+from Ball.Ball import Ball
+
 # Function definitions
 def pause(event):
     global running, canvas, info_display
@@ -31,13 +34,13 @@ def keydown(event):
 
 
 def update_ball():
-    global ball_center, ball_vel, canvas, ball
+    global ball_center, ball_vel, canvas, ball_canvas_object
     ball_center[0] += ball_vel[0]
     ball_center[1] += ball_vel[1]
     # ball has reached top or bottom of the field, must reflect
     if ((ball_center[1] + BALL_RADIUS) >= HEIGHT) or ((ball_center[1] - BALL_RADIUS) <= 0):
         ball_vel[1] *= -1
-    canvas.coords(ball, ball_center[0] - BALL_RADIUS, ball_center[1] - BALL_RADIUS, ball_center[0] + BALL_RADIUS, ball_center[1] + BALL_RADIUS)
+    canvas.coords(ball_canvas_object, ball_center[0] - BALL_RADIUS, ball_center[1] - BALL_RADIUS, ball_center[0] + BALL_RADIUS, ball_center[1] + BALL_RADIUS)
 
 
 def update_paddles():
@@ -86,7 +89,7 @@ def update_scores_display():
 
 
 def check_collision():
-    global ball_center, ball_vel, paddle1_pos, paddle2_pos, canvas, ball, paddle1, paddle2, score1, score2, score1display, score2display
+    global ball_center, ball_vel, paddle1_pos, paddle2_pos, canvas, ball_canvas_object, paddle1, paddle2, score1, score2, score1display, score2display
 
     # ball has reached left (player) side of field
     if (ball_center[0] - BALL_RADIUS) <= PAD_WIDTH:
@@ -124,13 +127,13 @@ def check_collision():
 
 
 def spawn_ball(direction):
-    global ball_center, ball_vel, canvas, ball
+    global ball_center, ball_vel, canvas, ball_canvas_object
     ball_center = [WIDTH / 2, HEIGHT / 2]
     if direction == RIGHT:
         ball_vel = [random.randrange(2, 4), -random.randrange(1, 3)]
     else:
         ball_vel = [-random.randrange(2, 4), -random.randrange(1, 3)]
-    canvas.coords(ball, ball_center[0] - BALL_RADIUS, ball_center[1] - BALL_RADIUS, ball_center[0] + BALL_RADIUS, ball_center[1] + BALL_RADIUS)
+    canvas.coords(ball_canvas_object, ball_center[0] - BALL_RADIUS, ball_center[1] - BALL_RADIUS, ball_center[0] + BALL_RADIUS, ball_center[1] + BALL_RADIUS)
 
 
 def new_game():
@@ -197,7 +200,8 @@ info_display = canvas.create_text(WIDTH / 4, HEIGHT - 25, text=INFO_STRING, fill
 # Ball
 ball_center = [WIDTH / 2, HEIGHT / 2]
 ball_vel = [1, 1]
-ball = canvas.create_oval(ball_center[0] - BALL_RADIUS, ball_center[1] - BALL_RADIUS, ball_center[0] + BALL_RADIUS, ball_center[1] + BALL_RADIUS, fill="white")
+ball = Ball(ball_center[0], ball_center[1], ball_vel[0], ball_vel[1])
+ball_canvas_object = canvas.create_oval(ball_center[0] - BALL_RADIUS, ball_center[1] - BALL_RADIUS, ball_center[0] + BALL_RADIUS, ball_center[1] + BALL_RADIUS, fill="white")
 
 # Paddles
 paddle1_pos = HEIGHT / 2
