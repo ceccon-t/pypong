@@ -29,6 +29,25 @@ def test_set_velocity():
     assert ball.vel(0) == new_vel_x
     assert ball.vel(1) == new_vel_y
 
+
+def test_scale_velocity():
+    vel_x = 5
+    vel_y = 17
+    
+    ball = Ball(0, 0, vel_x, vel_y)
+
+    scale_factor_x = -1.15
+    scale_factor_y = 0.75
+
+    ball.scale_vel(0, scale_factor_x)
+    ball.scale_vel(1, scale_factor_y)
+
+    expected_new_velocity_x = vel_x * scale_factor_x
+    expected_new_velocity_y = vel_y * scale_factor_y
+
+    assert ball.vel(0) == expected_new_velocity_x
+    assert ball.vel(1) == expected_new_velocity_y
+
 def test_update():
     pos_x = 5
     pos_y = 17

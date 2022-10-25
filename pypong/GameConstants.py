@@ -2,6 +2,7 @@ WIDTH = 800
 HEIGHT = 400
 
 BALL_RADIUS = 20
+BALL_COLOR = "white"
 
 COORD_X = 0
 COORD_Y = 1

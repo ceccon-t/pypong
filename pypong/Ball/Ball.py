@@ -17,4 +17,7 @@ class Ball:
     def set_vel(self, coord, value):
         self.velocity[coord] = value 
 
+    def scale_vel(self, coord, scaling_factor):
+        self.velocity[coord] *= scaling_factor
+
 

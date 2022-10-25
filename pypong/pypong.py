@@ -34,17 +34,16 @@ def keydown(event):
 
 
 def update_ball():
-    global ball_center, ball_vel, canvas, ball_canvas_object
-    ball_center[0] += ball_vel[0]
-    ball_center[1] += ball_vel[1]
+    global ball, canvas, ball_canvas_object
+    ball.update()
     # ball has reached top or bottom of the field, must reflect
-    if ((ball_center[1] + BALL_RADIUS) >= HEIGHT) or ((ball_center[1] - BALL_RADIUS) <= 0):
-        ball_vel[1] *= -1
-    canvas.coords(ball_canvas_object, ball_center[0] - BALL_RADIUS, ball_center[1] - BALL_RADIUS, ball_center[0] + BALL_RADIUS, ball_center[1] + BALL_RADIUS)
+    if ((ball.pos(COORD_Y) + BALL_RADIUS) >= HEIGHT) or ((ball.pos(COORD_Y) - BALL_RADIUS) <= 0):
+        ball.scale_vel(COORD_Y, -1) 
+    canvas.coords(ball_canvas_object, ball.pos(COORD_X) - BALL_RADIUS, ball.pos(COORD_Y) - BALL_RADIUS, ball.pos(COORD_X) + BALL_RADIUS, ball.pos(COORD_Y) + BALL_RADIUS)
 
 
 def update_paddles():
-    global paddle1_pos, paddle2_pos, paddle1_vel, paddle2_vel, canvas, paddle1, paddle2, ball_vel, ball_center
+    global paddle1_pos, paddle2_pos, paddle1_vel, paddle2_vel, canvas, paddle1, paddle2, ball
 
     new_paddle1_pos = paddle1_pos + paddle1_vel
     if new_paddle1_pos - HALF_PAD_HEIGHT >= 0 and new_paddle1_pos + HALF_PAD_HEIGHT <= HEIGHT:
@@ -53,16 +52,16 @@ def update_paddles():
     paddle1_vel = 0
 
     ### COMPUTER MOVEMENT DECICION ###
-    if ball_vel[0] > 0:
-        if ball_center[1] > paddle2_pos and ball_vel[1] > 0:
+    if ball.vel(COORD_X) > 0:
+        if ball.pos(COORD_Y) > paddle2_pos and ball.vel(COORD_Y) > 0:
             paddle2_vel = PADDLE_STEP * 0.6
-        elif ball_center[1] < paddle2_pos and ball_vel[1] < 0:
+        elif ball.pos(COORD_Y) < paddle2_pos and ball.vel(COORD_Y) < 0:
             paddle2_vel = -PADDLE_STEP * 0.6
         # panic mode (when ball is close enough always attempt to match it)
-        if ball_center[0] > (WIDTH * 3 / 4):
-            if ball_center[1] > (paddle2_pos + HALF_PAD_HEIGHT):
+        if ball.pos(COORD_X) > (WIDTH * 3 / 4):
+            if ball.pos(COORD_Y) > (paddle2_pos + HALF_PAD_HEIGHT):
                 paddle2_vel = PADDLE_STEP * 0.6
-            elif ball_center[1] < (paddle2_pos - HALF_PAD_HEIGHT):
+            elif ball.pos(COORD_Y) < (paddle2_pos - HALF_PAD_HEIGHT):
                 paddle2_vel = -PADDLE_STEP * 0.6
     ### END COMPUTER MOVEMENT DECICION ###
 
@@ -89,37 +88,35 @@ def update_scores_display():
 
 
 def check_collision():
-    global ball_center, ball_vel, paddle1_pos, paddle2_pos, canvas, ball_canvas_object, paddle1, paddle2, score1, score2, score1display, score2display
+    global ball, paddle1_pos, paddle2_pos, canvas, ball_canvas_object, paddle1, paddle2, score1, score2, score1display, score2display
 
     # ball has reached left (player) side of field
-    if (ball_center[0] - BALL_RADIUS) <= PAD_WIDTH:
-        if (ball_center[1] >= (paddle1_pos - HALF_PAD_HEIGHT)) and (ball_center[1] <= (paddle1_pos + HALF_PAD_HEIGHT)):
-            ball_vel[0] *= -1.0
-            if abs(ball_vel[0]) < 18: # Cap on the speed of the ball
-                ball_vel[0] *= 1.15
-            # print ball_vel[0]
+    if (ball.pos(COORD_X) - BALL_RADIUS) <= PAD_WIDTH:
+        if (ball.pos(COORD_Y) >= (paddle1_pos - HALF_PAD_HEIGHT)) and (ball.pos(COORD_Y) <= (paddle1_pos + HALF_PAD_HEIGHT)):
+            ball.scale_vel(COORD_X, -1.0) 
+            if abs(ball.vel(COORD_X)) < 18: # Cap on the speed of the ball
+                ball.scale_vel(COORD_X, 1.15) 
             # Changes vertical vel of ball depending on where it hit the pad
-            if ball_center[1] <= paddle1_pos:
-                ball_vel[1] -= 0.5
+            if ball.pos(COORD_Y) <= paddle1_pos:
+                ball.set_vel(COORD_Y, ball.vel(COORD_Y) - 0.5) 
             else:
-                ball_vel[1] += 0.5
+                ball.set_vel(COORD_Y, ball.vel(COORD_Y) + 0.5) 
         else:
             score2 += 1
             update_scores_display()
             spawn_ball(RIGHT)
 
     # ball has reached right (computer) side of field
-    elif (ball_center[0] + BALL_RADIUS) >= (WIDTH - PAD_WIDTH):
-        if (ball_center[1] >= (paddle2_pos - HALF_PAD_HEIGHT)) and (ball_center[1] <= (paddle2_pos + HALF_PAD_HEIGHT)):
-            ball_vel[0] *= -1.0
-            if abs(ball_vel[0]) < 18:  # Cap on the speed of the ball
-                ball_vel[0] *= 1.15
-            # print ball_vel[0]
+    elif (ball.pos(COORD_X) + BALL_RADIUS) >= (WIDTH - PAD_WIDTH):
+        if (ball.pos(COORD_Y) >= (paddle2_pos - HALF_PAD_HEIGHT)) and (ball.pos(COORD_Y) <= (paddle2_pos + HALF_PAD_HEIGHT)):
+            ball.scale_vel(COORD_X, -1.0) 
+            if abs(ball.vel(COORD_X)) < 18:  # Cap on the speed of the ball
+                ball.scale_vel(COORD_X, 1.15) 
             # Changes vertical vel of ball depending on where it hit the pad
-            if ball_center[1] <= paddle2_pos:
-                ball_vel[1] -= 0.5
+            if ball.pos(COORD_Y) <= paddle2_pos:
+                ball.set_vel(COORD_Y, ball.vel(COORD_Y) - 0.5) 
             else:
-                ball_vel[1] += 0.5
+                ball.set_vel(COORD_Y, ball.vel(COORD_Y) + 0.5) 
         else:
             score1 += 1
             update_scores_display()
@@ -127,13 +124,14 @@ def check_collision():
 
 
 def spawn_ball(direction):
-    global ball_center, ball_vel, canvas, ball_canvas_object
-    ball_center = [WIDTH / 2, HEIGHT / 2]
+    global ball, canvas, ball_canvas_object
+    vel = [0, 0]
     if direction == RIGHT:
-        ball_vel = [random.randrange(2, 4), -random.randrange(1, 3)]
+        vel = [random.randrange(2, 4), -random.randrange(1, 3)]
     else:
-        ball_vel = [-random.randrange(2, 4), -random.randrange(1, 3)]
-    canvas.coords(ball_canvas_object, ball_center[0] - BALL_RADIUS, ball_center[1] - BALL_RADIUS, ball_center[0] + BALL_RADIUS, ball_center[1] + BALL_RADIUS)
+        vel = [-random.randrange(2, 4), -random.randrange(1, 3)]
+    ball = Ball(WIDTH / 2, HEIGHT / 2, vel[0], vel[1])
+    canvas.coords(ball_canvas_object, ball.pos(COORD_X) - BALL_RADIUS, ball.pos(COORD_Y) - BALL_RADIUS, ball.pos(COORD_X) + BALL_RADIUS, ball.pos(COORD_Y) + BALL_RADIUS)
 
 
 def new_game():
@@ -198,10 +196,8 @@ score2display = canvas.create_text(WIDTH * 3/ 4, HEIGHT / 4, text=str(score2), f
 info_display = canvas.create_text(WIDTH / 4, HEIGHT - 25, text=INFO_STRING, fill="white", font=('Helvetica', '10'))
 
 # Ball
-ball_center = [WIDTH / 2, HEIGHT / 2]
-ball_vel = [1, 1]
-ball = Ball(ball_center[0], ball_center[1], ball_vel[0], ball_vel[1])
-ball_canvas_object = canvas.create_oval(ball_center[0] - BALL_RADIUS, ball_center[1] - BALL_RADIUS, ball_center[0] + BALL_RADIUS, ball_center[1] + BALL_RADIUS, fill="white")
+ball = Ball(WIDTH / 2, HEIGHT / 2, 1, 1)
+ball_canvas_object = canvas.create_oval(ball.pos(COORD_X) - BALL_RADIUS, ball.pos(COORD_Y) - BALL_RADIUS, ball.pos(COORD_X) + BALL_RADIUS, ball.pos(COORD_Y) + BALL_RADIUS, fill=BALL_COLOR)
 
 # Paddles
 paddle1_pos = HEIGHT / 2
