@@ -11,10 +11,12 @@ import random
 
 # Constants
 from GameConstants import *
-from Player.Paddle import Paddle, PAD_WIDTH, PAD_HEIGHT, HALF_PAD_WIDTH, HALF_PAD_HEIGHT
+from Player.Paddle import PAD_WIDTH, PAD_HEIGHT, HALF_PAD_WIDTH, HALF_PAD_HEIGHT
 
 
 from Ball.Ball import Ball
+from Player.Player import Player
+from Player.Paddle import Paddle
 
 # Function definitions
 def pause(event):
@@ -73,7 +75,9 @@ def update_paddles():
 
 
 def update_scores_display():
-    global score1, score2, score1display, score2display
+    global player_one, player_two, score1display, score2display
+    score1 = player_one.score()
+    score2 = player_two.score()
     canvas.itemconfigure(score1display, text=str(score1))
     canvas.itemconfigure(score2display, text=str(score2))
     if score1 > score2:
@@ -88,7 +92,7 @@ def update_scores_display():
 
 
 def check_collision():
-    global ball, player_one_paddle, canvas, ball_canvas_object, score1, score2, score1display, score2display
+    global ball, player_one, player_two, player_one_paddle, canvas, ball_canvas_object, score1display, score2display
 
     # ball has reached left (player) side of field
     if (ball.pos(COORD_X) - BALL_RADIUS) <= PAD_WIDTH:
@@ -102,7 +106,7 @@ def check_collision():
             else:
                 ball.set_vel(COORD_Y, ball.vel(COORD_Y) + 0.5) 
         else:
-            score2 += 1
+            player_two.increment_score()
             update_scores_display()
             spawn_ball(RIGHT)
 
@@ -118,7 +122,7 @@ def check_collision():
             else:
                 ball.set_vel(COORD_Y, ball.vel(COORD_Y) + 0.5) 
         else:
-            score1 += 1
+            player_one.increment_score()
             update_scores_display()
             spawn_ball(LEFT)
 
@@ -135,13 +139,13 @@ def spawn_ball(direction):
 
 
 def new_game():
-    global player_one_paddle, canvas, paddle_one_canvas_object, paddle_two_canvas_object, score1, score2, score1display, score2display, running, info_display
+    global player_one_paddle, canvas, paddle_one_canvas_object, paddle_two_canvas_object, player_one, player_two, score1display, score2display, running, info_display
     player_one_paddle = Paddle(PADDLE_INITIAL_POSITION, 0, HEIGHT)
     canvas.coords(paddle_one_canvas_object, HALF_PAD_WIDTH, player_one_paddle.pos() - HALF_PAD_HEIGHT, HALF_PAD_WIDTH, player_one_paddle.pos() + HALF_PAD_HEIGHT)
     player_two_paddle = Paddle(PADDLE_INITIAL_POSITION, 0, HEIGHT)
     canvas.coords(paddle_two_canvas_object, WIDTH - HALF_PAD_WIDTH, player_two_paddle.pos() - HALF_PAD_HEIGHT, WIDTH - HALF_PAD_WIDTH, player_two_paddle.pos() + HALF_PAD_HEIGHT)
-    score1 = 0
-    score2 = 0
+    player_one.reset_score()
+    player_two.reset_score()
     update_scores_display()
     spawn_ball(RIGHT)
     running = False  # Game starts paused to give player time to prepare
@@ -183,13 +187,6 @@ canvas.create_line(WIDTH / 2, 0, WIDTH / 2, HEIGHT, fill="white")
 canvas.create_line(PAD_WIDTH, 0, PAD_WIDTH, HEIGHT, fill="white")
 canvas.create_line(WIDTH - PAD_WIDTH, 0, WIDTH-PAD_WIDTH, HEIGHT, fill="white")
 
-# Scores
-score1 = 0
-score2 = 0
-
-score1display = canvas.create_text(WIDTH / 4, HEIGHT / 4, text=str(score1), fill=COLOR_DRAW, font=('Helvetica', '30'))
-score2display = canvas.create_text(WIDTH * 3/ 4, HEIGHT / 4, text=str(score2), fill=COLOR_DRAW, font=('Helvetica', '30'))
-
 # Info
 info_display = canvas.create_text(WIDTH / 4, HEIGHT - 25, text=INFO_STRING, fill="white", font=('Helvetica', '10'))
 
@@ -202,6 +199,14 @@ player_one_paddle = Paddle(PADDLE_INITIAL_POSITION, 0, HEIGHT)
 player_two_paddle = Paddle(PADDLE_INITIAL_POSITION, 0, HEIGHT)
 paddle_one_canvas_object = canvas.create_line(HALF_PAD_WIDTH, player_one_paddle.pos() - HALF_PAD_HEIGHT, HALF_PAD_WIDTH, player_one_paddle.pos() + HALF_PAD_HEIGHT, fill=PLAYER_ONE_COLOR, width = PAD_WIDTH)
 paddle_two_canvas_object = canvas.create_line(WIDTH - HALF_PAD_WIDTH, player_two_paddle.pos() - HALF_PAD_HEIGHT, WIDTH - HALF_PAD_WIDTH, player_two_paddle.pos() + HALF_PAD_HEIGHT, fill=PLAYER_TWO_COLOR, width=PAD_WIDTH)
+
+# Players
+player_one = Player()
+player_two = Player()
+
+# Scores
+score1display = canvas.create_text(WIDTH / 4, HEIGHT / 4, text=str(player_one.score()), fill=COLOR_DRAW, font=('Helvetica', '30'))
+score2display = canvas.create_text(WIDTH * 3/ 4, HEIGHT / 4, text=str(player_two.score()), fill=COLOR_DRAW, font=('Helvetica', '30'))
 
 # Game control
 running = False
