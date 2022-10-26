@@ -11,6 +11,7 @@ import random
 
 # Constants
 from GameConstants import *
+from Player.Paddle import Paddle, PAD_WIDTH, PAD_HEIGHT, HALF_PAD_WIDTH, HALF_PAD_HEIGHT
 
 
 from Ball.Ball import Ball
@@ -26,11 +27,11 @@ def pause(event):
 
 
 def keydown(event):
-    global paddle1_vel
+    global player_one_paddle
     if event.char == "w":
-        paddle1_vel = -PADDLE_STEP
+        player_one_paddle.set_vel(-PADDLE_STEP)
     elif event.char == "s":
-        paddle1_vel = PADDLE_STEP
+        player_one_paddle.set_vel(PADDLE_STEP)
 
 
 def update_ball():
@@ -43,13 +44,11 @@ def update_ball():
 
 
 def update_paddles():
-    global paddle1_pos, paddle2_pos, paddle1_vel, paddle2_vel, canvas, paddle1, paddle2, ball
+    global player_one_paddle, paddle2_pos, paddle2_vel, canvas, paddle_one_canvas_object, paddle_two_canvas_object, ball
 
-    new_paddle1_pos = paddle1_pos + paddle1_vel
-    if new_paddle1_pos - HALF_PAD_HEIGHT >= 0 and new_paddle1_pos + HALF_PAD_HEIGHT <= HEIGHT:
-        paddle1_pos = new_paddle1_pos
-        canvas.coords(paddle1, HALF_PAD_WIDTH, paddle1_pos - HALF_PAD_HEIGHT, HALF_PAD_WIDTH, paddle1_pos + HALF_PAD_HEIGHT)
-    paddle1_vel = 0
+    player_one_paddle.update()
+    canvas.coords(paddle_one_canvas_object, HALF_PAD_WIDTH, player_one_paddle.pos() - HALF_PAD_HEIGHT, HALF_PAD_WIDTH, player_one_paddle.pos() + HALF_PAD_HEIGHT)
+    player_one_paddle.set_vel(0)
 
     ### COMPUTER MOVEMENT DECICION ###
     if ball.vel(COORD_X) > 0:
@@ -68,7 +67,7 @@ def update_paddles():
     new_paddle2_pos = paddle2_pos + paddle2_vel
     if new_paddle2_pos - HALF_PAD_HEIGHT >= 0 and new_paddle2_pos + HALF_PAD_HEIGHT <= HEIGHT:
         paddle2_pos = new_paddle2_pos
-        canvas.coords(paddle2, WIDTH - HALF_PAD_WIDTH, paddle2_pos - HALF_PAD_HEIGHT, WIDTH - HALF_PAD_WIDTH, paddle2_pos + HALF_PAD_HEIGHT)
+        canvas.coords(paddle_two_canvas_object, WIDTH - HALF_PAD_WIDTH, paddle2_pos - HALF_PAD_HEIGHT, WIDTH - HALF_PAD_WIDTH, paddle2_pos + HALF_PAD_HEIGHT)
     paddle2_vel = 0
 
 
@@ -88,16 +87,16 @@ def update_scores_display():
 
 
 def check_collision():
-    global ball, paddle1_pos, paddle2_pos, canvas, ball_canvas_object, paddle1, paddle2, score1, score2, score1display, score2display
+    global ball, player_one_paddle, paddle2_pos, canvas, ball_canvas_object, score1, score2, score1display, score2display
 
     # ball has reached left (player) side of field
     if (ball.pos(COORD_X) - BALL_RADIUS) <= PAD_WIDTH:
-        if (ball.pos(COORD_Y) >= (paddle1_pos - HALF_PAD_HEIGHT)) and (ball.pos(COORD_Y) <= (paddle1_pos + HALF_PAD_HEIGHT)):
+        if (player_one_paddle.hits(ball.pos(COORD_Y))):
             ball.scale_vel(COORD_X, -1.0) 
             if abs(ball.vel(COORD_X)) < 18: # Cap on the speed of the ball
                 ball.scale_vel(COORD_X, 1.15) 
             # Changes vertical vel of ball depending on where it hit the pad
-            if ball.pos(COORD_Y) <= paddle1_pos:
+            if ball.pos(COORD_Y) <= player_one_paddle.pos():
                 ball.set_vel(COORD_Y, ball.vel(COORD_Y) - 0.5) 
             else:
                 ball.set_vel(COORD_Y, ball.vel(COORD_Y) + 0.5) 
@@ -135,13 +134,12 @@ def spawn_ball(direction):
 
 
 def new_game():
-    global paddle1_pos, paddle2_pos, paddle1_vel, paddle2_vel, canvas, paddle1, paddle2, score1, score2, score1display, score2display, running, info_display
-    paddle1_pos = HEIGHT / 2
-    canvas.coords(paddle1, HALF_PAD_WIDTH, paddle1_pos - HALF_PAD_HEIGHT, HALF_PAD_WIDTH, paddle1_pos + HALF_PAD_HEIGHT)
+    global player_one_paddle, paddle2_pos, paddle2_vel, canvas, paddle_one_canvas_object, paddle_two_canvas_object, score1, score2, score1display, score2display, running, info_display
+    player_one_paddle = Paddle(PADDLE_INITIAL_POSITION, 0, HEIGHT)
+    canvas.coords(paddle_one_canvas_object, HALF_PAD_WIDTH, player_one_paddle.pos() - HALF_PAD_HEIGHT, HALF_PAD_WIDTH, player_one_paddle.pos() + HALF_PAD_HEIGHT)
     paddle2_pos = HEIGHT / 2
-    canvas.coords(paddle2, WIDTH - HALF_PAD_WIDTH, paddle2_pos - HALF_PAD_HEIGHT, WIDTH - HALF_PAD_WIDTH, paddle2_pos + HALF_PAD_HEIGHT)
-    paddle1_vel = 0
     paddle2_vel = 0
+    canvas.coords(paddle_two_canvas_object, WIDTH - HALF_PAD_WIDTH, paddle2_pos - HALF_PAD_HEIGHT, WIDTH - HALF_PAD_WIDTH, paddle2_pos + HALF_PAD_HEIGHT)
     score1 = 0
     score2 = 0
     update_scores_display()
@@ -200,12 +198,11 @@ ball = Ball(WIDTH / 2, HEIGHT / 2, 1, 1)
 ball_canvas_object = canvas.create_oval(ball.pos(COORD_X) - BALL_RADIUS, ball.pos(COORD_Y) - BALL_RADIUS, ball.pos(COORD_X) + BALL_RADIUS, ball.pos(COORD_Y) + BALL_RADIUS, fill=BALL_COLOR)
 
 # Paddles
-paddle1_pos = HEIGHT / 2
 paddle2_pos = HEIGHT / 2
-paddle1_vel = 0
 paddle2_vel = 0
-paddle1 = canvas.create_line(HALF_PAD_WIDTH, paddle1_pos - HALF_PAD_HEIGHT, HALF_PAD_WIDTH, paddle1_pos + HALF_PAD_HEIGHT, fill="white", width = PAD_WIDTH)
-paddle2 = canvas.create_line(WIDTH - HALF_PAD_WIDTH, paddle2_pos - HALF_PAD_HEIGHT, WIDTH - HALF_PAD_WIDTH, paddle2_pos + HALF_PAD_HEIGHT, fill="white", width=PAD_WIDTH)
+player_one_paddle = Paddle(PADDLE_INITIAL_POSITION, 0, HEIGHT)
+paddle_one_canvas_object = canvas.create_line(HALF_PAD_WIDTH, player_one_paddle.pos() - HALF_PAD_HEIGHT, HALF_PAD_WIDTH, player_one_paddle.pos() + HALF_PAD_HEIGHT, fill=PLAYER_ONE_COLOR, width = PAD_WIDTH)
+paddle_two_canvas_object = canvas.create_line(WIDTH - HALF_PAD_WIDTH, paddle2_pos - HALF_PAD_HEIGHT, WIDTH - HALF_PAD_WIDTH, paddle2_pos + HALF_PAD_HEIGHT, fill="white", width=PAD_WIDTH)
 
 # Game control
 running = False
