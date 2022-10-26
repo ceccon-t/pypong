@@ -10,9 +10,13 @@ The most important constants used in the game can be found on file `GameConstant
 
 Class `Ball` in `Ball/Ball.py` contains logic related to storing and updating position and velocity of the ball.
 
+Class `Paddle` in `Player/Paddle.py` containss logic related to moving paddles and checking collisions with them. Deciding when to move (either from player input or AI) is planned to go elsewhere, meanwhile it is currently being done in the main script of the game.
+
+To maintain compatibility with Python 2, all subfolders of main folder containing scripts have an empty `__init__.py` file.
+
 ## Automated Tests
 
-Most classes contain a test suite associated with them, on a file with prefix `test_`. All tests can be executed by simply running `pytest` while on the main folder of the project. For more info, check section on libraries and frameworks being used.
+Most classes contain a test suite associated with them, on a file with prefix `test_`. All tests can be executed by simply running `pytest` while on the main folder of the project, assuming that pytest is installed. For more info, check section on libraries and frameworks being used.
 
 ## Libraries and Frameworks
 
