@@ -5,6 +5,7 @@ BALL_RADIUS = 20
 BALL_COLOR = "white"
 
 PLAYER_ONE_COLOR = "white"
+PLAYER_TWO_COLOR = "white"
 
 COORD_X = 0
 COORD_Y = 1
