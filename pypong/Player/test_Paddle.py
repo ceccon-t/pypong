@@ -1,4 +1,3 @@
-from turtle import position
 from Player.Paddle import Paddle, HALF_PAD_HEIGHT
 
 DEFAULT_POSITION = 100
