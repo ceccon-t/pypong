@@ -1,7 +1,18 @@
 class Player:
     
-    def __init__(self):
+    def __init__(self, paddle):
+        self._paddle = paddle
         self._score = 0
+
+    def paddle(self):
+        return self._paddle
+
+    def set_paddle(self, new_paddle):
+        self._paddle = new_paddle
+
+    def update_paddle(self):
+        self._paddle.update()
+        self._paddle.set_vel(0)
 
     def score(self):
         return self._score
