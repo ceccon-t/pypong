@@ -1,3 +1,5 @@
+GAME_TITLE = "PyPong"
+
 WIDTH = 800
 HEIGHT = 400
 FIELD_COLOR = "black"

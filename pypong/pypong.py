@@ -182,7 +182,7 @@ def gameloop():
 
 # Initializations
 root = Tk()
-root.title("PyPong")
+root.title(GAME_TITLE)
 
 # place game window in a nice position on screen
 screen_width = root.winfo_screenwidth()
