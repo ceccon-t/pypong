@@ -11,7 +11,7 @@ import random
 
 # Constants
 from GameConstants import *
-from Player.Paddle import PAD_WIDTH, PAD_HEIGHT, HALF_PAD_WIDTH, HALF_PAD_HEIGHT
+from Player.Paddle import PAD_WIDTH, HALF_PAD_WIDTH, HALF_PAD_HEIGHT
 
 
 from Ball.Ball import Ball
@@ -39,9 +39,9 @@ def keydown(event):
 
     player_one_paddle = player_one.paddle()
     if event.char == "w":
-        player_one_paddle.set_vel(-PADDLE_STEP)
+        player_one_paddle.accelerate(-1)
     elif event.char == "s":
-        player_one_paddle.set_vel(PADDLE_STEP)
+        player_one_paddle.accelerate(1)
 
 
 def update_ball():
@@ -65,16 +65,16 @@ def update_paddles():
     paddle2_vel = player_two_paddle.vel()
     if ball.vel(COORD_X) > 0:
         if ball.pos(COORD_Y) > paddle2_pos and ball.vel(COORD_Y) > 0:
-            paddle2_vel = PADDLE_STEP * 0.6
+            paddle2_vel = 0.6
         elif ball.pos(COORD_Y) < paddle2_pos and ball.vel(COORD_Y) < 0:
-            paddle2_vel = -PADDLE_STEP * 0.6
+            paddle2_vel = -0.6
         # panic mode (when ball is close enough always attempt to match it)
         if ball.pos(COORD_X) > (WIDTH * 3 / 4):
             if ball.pos(COORD_Y) > (paddle2_pos + HALF_PAD_HEIGHT):
-                paddle2_vel = PADDLE_STEP * 0.6
+                paddle2_vel = 0.6
             elif ball.pos(COORD_Y) < (paddle2_pos - HALF_PAD_HEIGHT):
-                paddle2_vel = -PADDLE_STEP * 0.6
-    player_two_paddle.set_vel(paddle2_vel)
+                paddle2_vel = -0.6
+    player_two_paddle.accelerate(paddle2_vel)
     ### END COMPUTER MOVEMENT DECICION ###
 
     player_two.update_paddle()

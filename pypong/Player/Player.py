@@ -12,7 +12,7 @@ class Player:
 
     def update_paddle(self):
         self._paddle.update()
-        self._paddle.set_vel(0)
+        self._paddle.accelerate(0)
 
     def score(self):
         return self._score

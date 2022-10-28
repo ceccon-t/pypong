@@ -3,6 +3,8 @@ PAD_HEIGHT = 80
 HALF_PAD_WIDTH = PAD_WIDTH / 2
 HALF_PAD_HEIGHT = PAD_HEIGHT / 2
 
+PADDLE_STEP = 4
+ 
 class Paddle():
     
     def __init__(self, position, limit_top, limit_bottom):
@@ -17,8 +19,8 @@ class Paddle():
     def vel(self):
         return self.velocity
 
-    def set_vel(self, new_velocity):
-        self.velocity = new_velocity
+    def accelerate(self, acceleration_factor):
+        self.velocity = acceleration_factor * PADDLE_STEP
 
     def update(self):
         new_pos = self.position + self.velocity

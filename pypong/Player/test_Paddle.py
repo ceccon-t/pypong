@@ -1,4 +1,4 @@
-from Player.Paddle import Paddle, HALF_PAD_HEIGHT
+from Player.Paddle import Paddle, HALF_PAD_HEIGHT, PADDLE_STEP
 
 DEFAULT_POSITION = 100
 DEFAULT_LIMIT_TOP = 0
@@ -21,51 +21,51 @@ def test_get_velocity():
     assert paddle.vel() == initial_velocity
 
 
-def test_set_velocity():
+def test_accelerate():
     paddle = _build_default_paddle()
 
-    new_velocity = -3
+    acceleration = -1
 
-    paddle.set_vel(new_velocity)
+    paddle.accelerate(acceleration)
 
-    assert paddle.vel() == new_velocity
+    assert paddle.vel() == acceleration * PADDLE_STEP
 
 
 def test_update():
     paddle = _build_default_paddle()
-    step = 4
+    acceleration = 1
 
-    paddle.set_vel(step)
+    paddle.accelerate(acceleration)
 
     paddle.update()
 
-    assert paddle.pos() == DEFAULT_POSITION + step
+    assert paddle.pos() == DEFAULT_POSITION + acceleration*PADDLE_STEP
 
 
 def test_update_respects_limits():
-    step = 1
-    limit_top = DEFAULT_POSITION - (HALF_PAD_HEIGHT + step)
-    limit_bottom = DEFAULT_POSITION + (HALF_PAD_HEIGHT + step)
+    acceleration = 1
+    limit_top = DEFAULT_POSITION - (HALF_PAD_HEIGHT + acceleration*PADDLE_STEP)
+    limit_bottom = DEFAULT_POSITION + (HALF_PAD_HEIGHT + acceleration*PADDLE_STEP)
     paddle = Paddle(DEFAULT_POSITION, limit_top, limit_bottom)
 
-    paddle.set_vel(-step)
+    paddle.accelerate(-acceleration)
 
     assert paddle.pos() == DEFAULT_POSITION
 
     paddle.update()
-    assert paddle.pos() == DEFAULT_POSITION - step # can move when respecting top limit
+    assert paddle.pos() == DEFAULT_POSITION - acceleration*PADDLE_STEP # can move when respecting top limit
 
     paddle.update()
-    assert paddle.pos() == DEFAULT_POSITION - step # expect no change, i.e. truncates at top
+    assert paddle.pos() == DEFAULT_POSITION - acceleration*PADDLE_STEP # expect no change, i.e. truncates at top
 
-    paddle.set_vel(step)
+    paddle.accelerate(acceleration)
 
     paddle.update() # back to original position
     paddle.update()
-    assert paddle.pos() == DEFAULT_POSITION + step # can move when respecting bottom limit
+    assert paddle.pos() == DEFAULT_POSITION + acceleration*PADDLE_STEP # can move when respecting bottom limit
 
     paddle.update()
-    assert paddle.pos() == DEFAULT_POSITION + step # expect no change, i.e. truncates at bottom
+    assert paddle.pos() == DEFAULT_POSITION + acceleration*PADDLE_STEP # expect no change, i.e. truncates at bottom
 
 
 def test_hits():
