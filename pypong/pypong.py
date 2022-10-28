@@ -57,7 +57,7 @@ def update_ball():
     global ball, field, canvas, ball_canvas_object
     ball.update()
     # ball has reached top or bottom of the field, must reflect
-    if field.hits_top(ball.pos(COORD_Y) - BALL_RADIUS) or field.hits_bottom(ball.pos(COORD_Y) + BALL_RADIUS):
+    if field.hits_top(ball.topmost()) or field.hits_bottom(ball.bottommost()):
         ball.scale_vel(COORD_Y, -1) 
     canvas.coords(ball_canvas_object, ball.pos(COORD_X) - BALL_RADIUS, ball.pos(COORD_Y) - BALL_RADIUS, ball.pos(COORD_X) + BALL_RADIUS, ball.pos(COORD_Y) + BALL_RADIUS)
 
@@ -100,7 +100,7 @@ def check_collision():
     player_two_paddle = player_two.paddle()
 
     # ball has reached left (player) side of field
-    if field.hits_left_goal_area(ball.pos(COORD_X) - BALL_RADIUS):
+    if field.hits_left_goal_area(ball.leftmost()):
         if (player_one_paddle.hits(ball.pos(COORD_Y))):
             ball.scale_vel(COORD_X, -1.0) 
             if abs(ball.vel(COORD_X)) < 18: # Cap on the speed of the ball
@@ -116,7 +116,7 @@ def check_collision():
             spawn_ball(RIGHT)
 
     # ball has reached right (computer) side of field
-    elif field.hits_right_goal_area(ball.pos(COORD_X) + BALL_RADIUS):
+    elif field.hits_right_goal_area(ball.rightmost()):
         if (player_two_paddle.hits(ball.pos(COORD_Y))):
             ball.scale_vel(COORD_X, -1.0) 
             if abs(ball.vel(COORD_X)) < 18:  # Cap on the speed of the ball
@@ -139,7 +139,7 @@ def spawn_ball(direction):
         vel = [random.randrange(2, 4), -random.randrange(1, 3)]
     else:
         vel = [-random.randrange(2, 4), -random.randrange(1, 3)]
-    ball = Ball(field.width() / 2, field.height() / 2, vel[0], vel[1])
+    ball = Ball(field.width() / 2, field.height() / 2, vel[0], vel[1], BALL_RADIUS)
     game_state.ball = ball
     canvas.coords(ball_canvas_object, ball.pos(COORD_X) - BALL_RADIUS, ball.pos(COORD_Y) - BALL_RADIUS, ball.pos(COORD_X) + BALL_RADIUS, ball.pos(COORD_Y) + BALL_RADIUS)
 
@@ -203,7 +203,7 @@ canvas.create_line(WIDTH - PAD_WIDTH, 0, WIDTH-PAD_WIDTH, HEIGHT, fill="white")
 info_display = canvas.create_text(WIDTH / 4, HEIGHT - 25, text=INFO_STRING, fill="white", font=('Helvetica', '10'))
 
 # Ball
-ball = Ball(field.width() / 2, field.height() / 2, 1, 1)
+ball = Ball(field.width() / 2, field.height() / 2, 1, 1, BALL_RADIUS)
 ball_canvas_object = canvas.create_oval(ball.pos(COORD_X) - BALL_RADIUS, ball.pos(COORD_Y) - BALL_RADIUS, ball.pos(COORD_X) + BALL_RADIUS, ball.pos(COORD_Y) + BALL_RADIUS, fill=BALL_COLOR)
 
 # Players
