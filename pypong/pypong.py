@@ -1,9 +1,9 @@
-try:
-    from Tkinter import *  # Python 2
+try:  # Python 3
+    from tkinter import *  
 except ImportError:
-    try:
-        from tkinter import *  # Python 3
-    except ImportError:
+    try:  # Python 2
+        from Tkinter import *  
+    except ImportError:  # Tkinter not installed...
         raise ImportError("This program requires Tkinter, please make sure you have it installed.")
 
 import random
@@ -11,13 +11,18 @@ import random
 
 # Constants
 from GameConstants import *
-from Player.Paddle import PAD_WIDTH, HALF_PAD_WIDTH, HALF_PAD_HEIGHT
+from Player.Paddle import PAD_WIDTH, HALF_PAD_WIDTH, PAD_HEIGHT, HALF_PAD_HEIGHT
 
 
 from Ball.Ball import Ball
 from Player.Player import Player
 from Player.Paddle import Paddle
 
+from Strategy.GameState import GameState
+from Strategy.Strategy import PLAYER_ONE, PLAYER_TWO
+
+from Strategy.StrategyHumanPlayer import StrategyHumanPlayer
+from Strategy.StrategySimpleComputerPlayer import StrategySimpleComputerPlayer
 
 # Helper functions
 def _new_base_paddle():
@@ -35,13 +40,16 @@ def pause(event):
 
 
 def keydown(event):
-    global player_one
+    global game_state
 
-    player_one_paddle = player_one.paddle()
     if event.char == "w":
-        player_one_paddle.accelerate(-1)
+        game_state.player_one_acceleration_factor = -1
     elif event.char == "s":
-        player_one_paddle.accelerate(1)
+        game_state.player_one_acceleration_factor = 1
+    elif event.char == "o":
+        game_state.player_two_acceleration_factor = -1
+    elif event.char == "l":
+        game_state.player_two_acceleration_factor = 1
 
 
 def update_ball():
@@ -54,30 +62,16 @@ def update_ball():
 
 
 def update_paddles():
-    global player_one, player_two, canvas, paddle_one_canvas_object, paddle_two_canvas_object, ball
+    global player_one, player_two, game_state, canvas, paddle_one_canvas_object, paddle_two_canvas_object, ball
 
-    player_one.update_paddle()
+    # Update player one paddle
+    player_one.move(game_state)
+    game_state.player_one_acceleration_factor = 0
     canvas.coords(paddle_one_canvas_object, HALF_PAD_WIDTH, player_one.paddle().pos() - HALF_PAD_HEIGHT, HALF_PAD_WIDTH, player_one.paddle().pos() + HALF_PAD_HEIGHT)
 
-    ### COMPUTER MOVEMENT DECICION ###
-    player_two_paddle = player_two.paddle()
-    paddle2_pos = player_two_paddle.pos()
-    paddle2_vel = player_two_paddle.vel()
-    if ball.vel(COORD_X) > 0:
-        if ball.pos(COORD_Y) > paddle2_pos and ball.vel(COORD_Y) > 0:
-            paddle2_vel = 0.6
-        elif ball.pos(COORD_Y) < paddle2_pos and ball.vel(COORD_Y) < 0:
-            paddle2_vel = -0.6
-        # panic mode (when ball is close enough always attempt to match it)
-        if ball.pos(COORD_X) > (WIDTH * 3 / 4):
-            if ball.pos(COORD_Y) > (paddle2_pos + HALF_PAD_HEIGHT):
-                paddle2_vel = 0.6
-            elif ball.pos(COORD_Y) < (paddle2_pos - HALF_PAD_HEIGHT):
-                paddle2_vel = -0.6
-    player_two_paddle.accelerate(paddle2_vel)
-    ### END COMPUTER MOVEMENT DECICION ###
-
-    player_two.update_paddle()
+    # Update player two paddle
+    player_two.move(game_state)
+    game_state.player_two_acceleration_factor = 0
     canvas.coords(paddle_two_canvas_object, WIDTH - HALF_PAD_WIDTH, player_two.paddle().pos() - HALF_PAD_HEIGHT, WIDTH - HALF_PAD_WIDTH, player_two.paddle().pos() + HALF_PAD_HEIGHT)
 
 
@@ -138,13 +132,14 @@ def check_collision():
 
 
 def spawn_ball(direction):
-    global ball, canvas, ball_canvas_object
+    global game_state, ball, canvas, ball_canvas_object
     vel = [0, 0]
     if direction == RIGHT:
         vel = [random.randrange(2, 4), -random.randrange(1, 3)]
     else:
         vel = [-random.randrange(2, 4), -random.randrange(1, 3)]
     ball = Ball(WIDTH / 2, HEIGHT / 2, vel[0], vel[1])
+    game_state.ball = ball
     canvas.coords(ball_canvas_object, ball.pos(COORD_X) - BALL_RADIUS, ball.pos(COORD_Y) - BALL_RADIUS, ball.pos(COORD_X) + BALL_RADIUS, ball.pos(COORD_Y) + BALL_RADIUS)
 
 
@@ -210,8 +205,8 @@ ball = Ball(WIDTH / 2, HEIGHT / 2, 1, 1)
 ball_canvas_object = canvas.create_oval(ball.pos(COORD_X) - BALL_RADIUS, ball.pos(COORD_Y) - BALL_RADIUS, ball.pos(COORD_X) + BALL_RADIUS, ball.pos(COORD_Y) + BALL_RADIUS, fill=BALL_COLOR)
 
 # Players
-player_one = Player(_new_base_paddle())
-player_two = Player(_new_base_paddle())
+player_one = Player(_new_base_paddle(), StrategyHumanPlayer(PLAYER_ONE))
+player_two = Player(_new_base_paddle(), StrategySimpleComputerPlayer(PLAYER_TWO))
 paddle_one_canvas_object = canvas.create_line(HALF_PAD_WIDTH, player_one.paddle().pos() - HALF_PAD_HEIGHT, HALF_PAD_WIDTH, player_one.paddle().pos() + HALF_PAD_HEIGHT, fill=PLAYER_ONE_COLOR, width = PAD_WIDTH)
 paddle_two_canvas_object = canvas.create_line(WIDTH - HALF_PAD_WIDTH, player_two.paddle().pos() - HALF_PAD_HEIGHT, WIDTH - HALF_PAD_WIDTH, player_two.paddle().pos() + HALF_PAD_HEIGHT, fill=PLAYER_TWO_COLOR, width=PAD_WIDTH)
 
@@ -219,8 +214,21 @@ paddle_two_canvas_object = canvas.create_line(WIDTH - HALF_PAD_WIDTH, player_two
 score1display = canvas.create_text(WIDTH / 4, HEIGHT / 4, text=str(player_one.score()), fill=COLOR_DRAW, font=('Helvetica', '30'))
 score2display = canvas.create_text(WIDTH * 3/ 4, HEIGHT / 4, text=str(player_two.score()), fill=COLOR_DRAW, font=('Helvetica', '30'))
 
+# Game state
+game_state = GameState()
+game_state.ball = ball 
+game_state.player_one = player_one
+game_state.player_two = player_two 
+game_state.coord_x_universal_id = COORD_X
+game_state.coord_y_universal_id = COORD_Y 
+game_state.field_width = WIDTH
+game_state.field_height = HEIGHT
+game_state.paddle_width = PAD_WIDTH
+game_state.paddle_height = PAD_HEIGHT
+
 # Game control
 running = False
+
 
 # User input
 root.bind('<Key>', keydown)

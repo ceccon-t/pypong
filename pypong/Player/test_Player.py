@@ -1,7 +1,7 @@
 from Player.Player import Player
 
 def _build_default_player():
-    return Player(None)
+    return Player(None, None)
 
 
 def test_initial_score():
