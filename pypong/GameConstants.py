@@ -1,5 +1,6 @@
 WIDTH = 800
 HEIGHT = 400
+FIELD_COLOR = "black"
 
 BALL_RADIUS = 20
 BALL_COLOR = "white"

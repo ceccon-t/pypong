@@ -13,6 +13,7 @@ import random
 from GameConstants import *
 from Player.Paddle import PAD_WIDTH, HALF_PAD_WIDTH, PAD_HEIGHT, HALF_PAD_HEIGHT
 
+from Field.Field import Field
 
 from Ball.Ball import Ball
 from Player.Player import Player
@@ -53,10 +54,10 @@ def keydown(event):
 
 
 def update_ball():
-    global ball, canvas, ball_canvas_object
+    global ball, field, canvas, ball_canvas_object
     ball.update()
     # ball has reached top or bottom of the field, must reflect
-    if ((ball.pos(COORD_Y) + BALL_RADIUS) >= HEIGHT) or ((ball.pos(COORD_Y) - BALL_RADIUS) <= 0):
+    if field.hits_top(ball.pos(COORD_Y) - BALL_RADIUS) or field.hits_bottom(ball.pos(COORD_Y) + BALL_RADIUS):
         ball.scale_vel(COORD_Y, -1) 
     canvas.coords(ball_canvas_object, ball.pos(COORD_X) - BALL_RADIUS, ball.pos(COORD_Y) - BALL_RADIUS, ball.pos(COORD_X) + BALL_RADIUS, ball.pos(COORD_Y) + BALL_RADIUS)
 
@@ -93,13 +94,13 @@ def update_scores_display():
 
 
 def check_collision():
-    global ball, player_one, player_two, canvas, ball_canvas_object, score1display, score2display
+    global ball, field, player_one, player_two, canvas, ball_canvas_object, score1display, score2display
 
     player_one_paddle = player_one.paddle()
     player_two_paddle = player_two.paddle()
 
     # ball has reached left (player) side of field
-    if (ball.pos(COORD_X) - BALL_RADIUS) <= PAD_WIDTH:
+    if field.hits_left_goal_area(ball.pos(COORD_X) - BALL_RADIUS):
         if (player_one_paddle.hits(ball.pos(COORD_Y))):
             ball.scale_vel(COORD_X, -1.0) 
             if abs(ball.vel(COORD_X)) < 18: # Cap on the speed of the ball
@@ -115,7 +116,7 @@ def check_collision():
             spawn_ball(RIGHT)
 
     # ball has reached right (computer) side of field
-    elif (ball.pos(COORD_X) + BALL_RADIUS) >= (WIDTH - PAD_WIDTH):
+    elif field.hits_right_goal_area(ball.pos(COORD_X) + BALL_RADIUS):
         if (player_two_paddle.hits(ball.pos(COORD_Y))):
             ball.scale_vel(COORD_X, -1.0) 
             if abs(ball.vel(COORD_X)) < 18:  # Cap on the speed of the ball
@@ -132,13 +133,13 @@ def check_collision():
 
 
 def spawn_ball(direction):
-    global game_state, ball, canvas, ball_canvas_object
+    global game_state, ball, field, canvas, ball_canvas_object
     vel = [0, 0]
     if direction == RIGHT:
         vel = [random.randrange(2, 4), -random.randrange(1, 3)]
     else:
         vel = [-random.randrange(2, 4), -random.randrange(1, 3)]
-    ball = Ball(WIDTH / 2, HEIGHT / 2, vel[0], vel[1])
+    ball = Ball(field.width() / 2, field.height() / 2, vel[0], vel[1])
     game_state.ball = ball
     canvas.coords(ball_canvas_object, ball.pos(COORD_X) - BALL_RADIUS, ball.pos(COORD_Y) - BALL_RADIUS, ball.pos(COORD_X) + BALL_RADIUS, ball.pos(COORD_Y) + BALL_RADIUS)
 
@@ -189,7 +190,8 @@ screen_height = root.winfo_screenheight()
 root.geometry("+" + str(screen_width // 4) + "+" + str(screen_height // 4))  # using only offsets from left and top
 
 # Canvas / Field
-canvas = Canvas(root, width=WIDTH, height=HEIGHT, bg="black")
+field = Field(WIDTH, HEIGHT, FIELD_COLOR, PAD_WIDTH)
+canvas = Canvas(root, width=field.width(), height=field.height(), bg=field.color())
 canvas.pack()
 
 # Field lines
@@ -201,7 +203,7 @@ canvas.create_line(WIDTH - PAD_WIDTH, 0, WIDTH-PAD_WIDTH, HEIGHT, fill="white")
 info_display = canvas.create_text(WIDTH / 4, HEIGHT - 25, text=INFO_STRING, fill="white", font=('Helvetica', '10'))
 
 # Ball
-ball = Ball(WIDTH / 2, HEIGHT / 2, 1, 1)
+ball = Ball(field.width() / 2, field.height() / 2, 1, 1)
 ball_canvas_object = canvas.create_oval(ball.pos(COORD_X) - BALL_RADIUS, ball.pos(COORD_Y) - BALL_RADIUS, ball.pos(COORD_X) + BALL_RADIUS, ball.pos(COORD_Y) + BALL_RADIUS, fill=BALL_COLOR)
 
 # Players
@@ -221,8 +223,8 @@ game_state.player_one = player_one
 game_state.player_two = player_two 
 game_state.coord_x_universal_id = COORD_X
 game_state.coord_y_universal_id = COORD_Y 
-game_state.field_width = WIDTH
-game_state.field_height = HEIGHT
+game_state.field_width = field.width()
+game_state.field_height = field.height()
 game_state.paddle_width = PAD_WIDTH
 game_state.paddle_height = PAD_HEIGHT
 
