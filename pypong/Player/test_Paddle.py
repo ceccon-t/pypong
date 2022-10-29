@@ -84,5 +84,14 @@ def test_hits():
     assert paddle.hits(point_below) == False
 
 
+def test_topmost():
+    paddle = _build_default_paddle()
+    assert paddle.topmost() == DEFAULT_POSITION - HALF_PAD_HEIGHT
+
+def test_bottommost():
+    paddle = _build_default_paddle()
+    assert paddle.bottommost() == DEFAULT_POSITION + HALF_PAD_HEIGHT
+
+
 
 

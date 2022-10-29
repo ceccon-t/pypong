@@ -19,6 +19,12 @@ class Paddle():
     def vel(self):
         return self.velocity
 
+    def topmost(self):
+        return self.position - HALF_PAD_HEIGHT
+
+    def bottommost(self):
+        return self.position + HALF_PAD_HEIGHT
+
     def accelerate(self, acceleration_factor):
         self.velocity = acceleration_factor * PADDLE_STEP
 

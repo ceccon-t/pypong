@@ -13,6 +13,8 @@ import random
 from GameConstants import *
 from Player.Paddle import PAD_WIDTH, HALF_PAD_WIDTH, PAD_HEIGHT, HALF_PAD_HEIGHT
 
+from TkinterPypongScreen import TkinterPypongScreen
+
 from Field.Field import Field
 
 from Ball.Ball import Ball
@@ -32,12 +34,14 @@ def _new_base_paddle():
 
 # Function definitions
 def pause(event):
-    global running, canvas, info_display
+    global running, screen, canvas, info_display
     running = not running
     if running:
         canvas.itemconfigure(info_display, text=INFO_STRING)
+        screen.set_instructions_message(INFO_STRING)
     else:
         canvas.itemconfigure(info_display, text=INFO_STRING_PAUSED)
+        screen.set_instructions_message(INFO_STRING_PAUSED)
 
 
 def keydown(event):
@@ -54,47 +58,58 @@ def keydown(event):
 
 
 def update_ball():
-    global ball, field, canvas, ball_canvas_object
+    global ball, field, screen, canvas, ball_canvas_object
     ball.update()
     # ball has reached top or bottom of the field, must reflect
     if field.hits_top(ball.topmost()) or field.hits_bottom(ball.bottommost()):
         ball.scale_vel(COORD_Y, -1) 
     canvas.coords(ball_canvas_object, ball.pos(COORD_X) - BALL_RADIUS, ball.pos(COORD_Y) - BALL_RADIUS, ball.pos(COORD_X) + BALL_RADIUS, ball.pos(COORD_Y) + BALL_RADIUS)
+    screen.draw_ball(ball)
 
 
 def update_paddles():
-    global player_one, player_two, game_state, canvas, paddle_one_canvas_object, paddle_two_canvas_object, ball
+    global player_one, player_two, game_state, screen, canvas, paddle_one_canvas_object, paddle_two_canvas_object, ball
 
     # Update player one paddle
     player_one.move(game_state)
     game_state.player_one_acceleration_factor = 0
     canvas.coords(paddle_one_canvas_object, HALF_PAD_WIDTH, player_one.paddle().pos() - HALF_PAD_HEIGHT, HALF_PAD_WIDTH, player_one.paddle().pos() + HALF_PAD_HEIGHT)
+    screen.draw_left_paddle(player_one.paddle())
 
     # Update player two paddle
     player_two.move(game_state)
     game_state.player_two_acceleration_factor = 0
     canvas.coords(paddle_two_canvas_object, WIDTH - HALF_PAD_WIDTH, player_two.paddle().pos() - HALF_PAD_HEIGHT, WIDTH - HALF_PAD_WIDTH, player_two.paddle().pos() + HALF_PAD_HEIGHT)
+    screen.draw_right_paddle(player_two.paddle())
 
 
 def update_scores_display():
-    global player_one, player_two, score1display, score2display
+    global player_one, player_two, screen, score1display, score2display
     score1 = player_one.score()
     score2 = player_two.score()
     canvas.itemconfigure(score1display, text=str(score1))
     canvas.itemconfigure(score2display, text=str(score2))
+    score1_color = COLOR_DRAW
+    score2_color = COLOR_DRAW
     if score1 > score2:
         canvas.itemconfigure(score1display, fill=COLOR_WINNING)
         canvas.itemconfigure(score2display, fill=COLOR_LOSING)
+        score1_color = COLOR_WINNING
+        score2_color = COLOR_LOSING
     elif score1 < score2:
         canvas.itemconfigure(score1display, fill=COLOR_LOSING)
         canvas.itemconfigure(score2display, fill=COLOR_WINNING)
+        score2_color = COLOR_WINNING
+        score1_color = COLOR_LOSING
     else:
         canvas.itemconfigure(score1display, fill=COLOR_DRAW)
         canvas.itemconfigure(score2display, fill=COLOR_DRAW)
+    screen.draw_score_left(score1, score1_color)
+    screen.draw_score_right(score2, score2_color)
 
 
 def check_collision():
-    global ball, field, player_one, player_two, canvas, ball_canvas_object, score1display, score2display
+    global ball, field, player_one, player_two
 
     player_one_paddle = player_one.paddle()
     player_two_paddle = player_two.paddle()
@@ -133,7 +148,7 @@ def check_collision():
 
 
 def spawn_ball(direction):
-    global game_state, ball, field, canvas, ball_canvas_object
+    global game_state, ball, field, screen, canvas, ball_canvas_object
     vel = [0, 0]
     if direction == RIGHT:
         vel = [random.randrange(2, 4), -random.randrange(1, 3)]
@@ -142,16 +157,19 @@ def spawn_ball(direction):
     ball = Ball(field.width() / 2, field.height() / 2, vel[0], vel[1], BALL_RADIUS)
     game_state.ball = ball
     canvas.coords(ball_canvas_object, ball.pos(COORD_X) - BALL_RADIUS, ball.pos(COORD_Y) - BALL_RADIUS, ball.pos(COORD_X) + BALL_RADIUS, ball.pos(COORD_Y) + BALL_RADIUS)
+    screen.draw_ball(ball)
 
 
 def new_game():
-    global canvas, player_one, player_two, paddle_one_canvas_object, paddle_two_canvas_object, score1display, score2display, running, info_display
+    global screen, canvas, player_one, player_two, paddle_one_canvas_object, paddle_two_canvas_object, running, info_display
     
     player_one.set_paddle(_new_base_paddle())
     canvas.coords(paddle_one_canvas_object, HALF_PAD_WIDTH, player_one.paddle().pos() - HALF_PAD_HEIGHT, HALF_PAD_WIDTH, player_one.paddle().pos() + HALF_PAD_HEIGHT)
+    screen.draw_left_paddle(player_one.paddle())
     
     player_two.set_paddle(_new_base_paddle())
     canvas.coords(paddle_two_canvas_object, WIDTH - HALF_PAD_WIDTH, player_two.paddle().pos() - HALF_PAD_HEIGHT, WIDTH - HALF_PAD_WIDTH, player_two.paddle().pos() + HALF_PAD_HEIGHT)
+    screen.draw_right_paddle(player_two.paddle())
 
     player_one.reset_score()
     player_two.reset_score()
@@ -161,6 +179,7 @@ def new_game():
 
     running = False  # Game starts paused to give player time to prepare
     canvas.itemconfigure(info_display, text=INFO_STRING_PAUSED)
+    screen.set_instructions_message(INFO_STRING_PAUSED)
 
 
 def restart(event):
@@ -190,7 +209,9 @@ screen_height = root.winfo_screenheight()
 root.geometry("+" + str(screen_width // 4) + "+" + str(screen_height // 4))  # using only offsets from left and top
 
 # Canvas / Field
-field = Field(WIDTH, HEIGHT, FIELD_COLOR, PAD_WIDTH)
+field = Field(WIDTH, HEIGHT, FIELD_COLOR, FIELD_COLOR_LINES, PAD_WIDTH)
+
+screen = TkinterPypongScreen(root, field, PAD_HEIGHT, PAD_WIDTH, PLAYER_ONE_COLOR, PLAYER_TWO_COLOR)
 canvas = Canvas(root, width=field.width(), height=field.height(), bg=field.color())
 canvas.pack()
 
@@ -201,16 +222,20 @@ canvas.create_line(WIDTH - PAD_WIDTH, 0, WIDTH-PAD_WIDTH, HEIGHT, fill="white")
 
 # Info
 info_display = canvas.create_text(WIDTH / 4, HEIGHT - 25, text=INFO_STRING, fill="white", font=('Helvetica', '10'))
+screen.set_instructions_message(INFO_STRING)
 
 # Ball
 ball = Ball(field.width() / 2, field.height() / 2, 1, 1, BALL_RADIUS)
 ball_canvas_object = canvas.create_oval(ball.pos(COORD_X) - BALL_RADIUS, ball.pos(COORD_Y) - BALL_RADIUS, ball.pos(COORD_X) + BALL_RADIUS, ball.pos(COORD_Y) + BALL_RADIUS, fill=BALL_COLOR)
+screen.create_ball_object(ball, BALL_COLOR)
 
 # Players
 player_one = Player(_new_base_paddle(), StrategyHumanPlayer(PLAYER_ONE))
 player_two = Player(_new_base_paddle(), StrategySimpleComputerPlayer(PLAYER_TWO))
 paddle_one_canvas_object = canvas.create_line(HALF_PAD_WIDTH, player_one.paddle().pos() - HALF_PAD_HEIGHT, HALF_PAD_WIDTH, player_one.paddle().pos() + HALF_PAD_HEIGHT, fill=PLAYER_ONE_COLOR, width = PAD_WIDTH)
+screen.create_left_paddle_object(player_one.paddle())
 paddle_two_canvas_object = canvas.create_line(WIDTH - HALF_PAD_WIDTH, player_two.paddle().pos() - HALF_PAD_HEIGHT, WIDTH - HALF_PAD_WIDTH, player_two.paddle().pos() + HALF_PAD_HEIGHT, fill=PLAYER_TWO_COLOR, width=PAD_WIDTH)
+screen.create_right_paddle_object(player_two.paddle())
 
 # Scores
 score1display = canvas.create_text(WIDTH / 4, HEIGHT / 4, text=str(player_one.score()), fill=COLOR_DRAW, font=('Helvetica', '30'))

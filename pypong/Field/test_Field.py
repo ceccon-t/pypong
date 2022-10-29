@@ -3,11 +3,12 @@ from Field.Field import Field
 DEFAULT_WIDTH = 100
 DEFAULT_HEIGHT = 100 
 DEFAULT_COLOR = "black"
+DEFAULT_COLOR_LINES = "white"
 DEFAULT_PAD_WIDTH = 4
 
 
 def _build_default_field():
-    return Field(DEFAULT_WIDTH, DEFAULT_HEIGHT, DEFAULT_COLOR, DEFAULT_PAD_WIDTH)
+    return Field(DEFAULT_WIDTH, DEFAULT_HEIGHT, DEFAULT_COLOR, DEFAULT_COLOR_LINES, DEFAULT_PAD_WIDTH)
 
 
 def test_get_width():
@@ -21,6 +22,14 @@ def test_get_height():
 def test_get_color():
     field = _build_default_field()
     assert field.color() == DEFAULT_COLOR
+
+def test_get_color_lines():
+    field = _build_default_field()
+    assert field.color_lines() == DEFAULT_COLOR_LINES
+
+def test_get_goal_line_offset():
+    field = _build_default_field()
+    assert field.goal_line_offset() == DEFAULT_PAD_WIDTH
 
 def test_hits_top():
     field = _build_default_field()

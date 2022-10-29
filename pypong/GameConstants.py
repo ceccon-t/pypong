@@ -3,6 +3,7 @@ GAME_TITLE = "PyPong"
 WIDTH = 800
 HEIGHT = 400
 FIELD_COLOR = "black"
+FIELD_COLOR_LINES = "white"
 
 BALL_RADIUS = 20
 BALL_COLOR = "white"
