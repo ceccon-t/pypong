@@ -8,15 +8,17 @@ This project was initially developed with all the logic and data on a single fil
 
 The most important constants used in the game can be found on file `GameConstants.py`.
 
-Class `Ball` in `Ball/Ball.py` contains logic related to storing and updating position and velocity of the ball.
+Classes `Ball`, `Field` and `Paddle` (this one under `Player` folder) contain the logic to model and manipulate the respective game elements. Class `Player` contains a reference to the `Paddle` that this player controls, as well as a reference to a `Strategy` object to which player movement decisions should be delegated.
 
-Class `Paddle` in `Player/Paddle.py` containss logic related to moving paddles and checking collisions with them. Deciding when to move (either from player input or AI) is planned to go elsewhere, meanwhile it is currently being done in the main script of the game.
+All player movements, either from human players or AI players, are handled in classes that extend `Strategy`, implementing its only method. Any strategy implemented should use the `GameState` object that this method receives as a parameter to determine if the player's paddle should move down (by returning a positive number), up (by returning a negative number) or stay put (by returning zero) - the returned value should preferably be on the -1.0 to 1.0 range. The game currently contains two strategies, one for human players and one for a very basic AI player. 
+
+Class `TkinterPypongScreen` is responsible to handle most of the specifics of displaying things on the screen, leaving the game logic and modeling to the other classes mentioned above.
 
 To maintain compatibility with Python 2, all subfolders of main folder containing scripts have an empty `__init__.py` file.
 
 ## Automated Tests
 
-Most classes contain a test suite associated with them, on a file with prefix `test_`. All tests can be executed by simply running `pytest` while on the main folder of the project, assuming that pytest is installed. For more info, check section on libraries and frameworks being used.
+Most classes contain a test suite associated with them, on a file with prefix `test_`. All tests can be executed by simply running `pytest` while on the main folder of the project, assuming that pytest is installed. For more info, check section on libraries and frameworks being used. Although the game currently works on Python 2, automated tests will only be maintained for Python 3.
 
 ## Libraries and Frameworks
 
