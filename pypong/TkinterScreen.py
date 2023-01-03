@@ -7,7 +7,7 @@ except ImportError:
         raise ImportError("This program requires Tkinter, please make sure you have it installed.")
 
 
-class TkinterPypongScreen:
+class TkinterScreen:
 
     def __init__(self, root_element, field, paddle_height, paddle_width, player_one_color, player_two_color):
         self._field = field 

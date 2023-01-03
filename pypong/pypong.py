@@ -12,7 +12,7 @@ import random
 from GameConstants import *
 from Player.Paddle import PAD_WIDTH, HALF_PAD_WIDTH, PAD_HEIGHT, HALF_PAD_HEIGHT
 
-from TkinterPypongScreen import TkinterPypongScreen
+from TkinterScreen import TkinterScreen
 
 from Field.Field import Field
 
@@ -193,7 +193,7 @@ root.geometry("+" + str(screen_width // 4) + "+" + str(screen_height // 4))  # u
 
 # Field and screen
 field = Field(WIDTH, HEIGHT, FIELD_COLOR, FIELD_COLOR_LINES, PAD_WIDTH)
-screen = TkinterPypongScreen(root, field, PAD_HEIGHT, PAD_WIDTH, PLAYER_ONE_COLOR, PLAYER_TWO_COLOR)
+screen = TkinterScreen(root, field, PAD_HEIGHT, PAD_WIDTH, PLAYER_ONE_COLOR, PLAYER_TWO_COLOR)
 
 
 # Info
