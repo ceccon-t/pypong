@@ -3,7 +3,7 @@ import random
 from GameConstants import *
 from Player.Paddle import PAD_WIDTH, HALF_PAD_WIDTH, PAD_HEIGHT, HALF_PAD_HEIGHT
 
-from TkinterScreen import TkinterScreen
+from TkinterScreen import *
 
 from Field.Field import Field
 
@@ -206,9 +206,9 @@ game_state.paddle_height = PAD_HEIGHT
 running = False
 
 # User input
-screen.bind_key('<Key>', keydown)
-screen.bind_key('<space>', pause)
-screen.bind_key('<Escape>', restart)
+screen.bind_key(TK_KEY_ID_GENERIC_KEY, keydown)
+screen.bind_key(TK_KEY_ID_SPACE, pause)
+screen.bind_key(TK_KEY_ID_ESCAPE, restart)
 
 
 # Start game loop

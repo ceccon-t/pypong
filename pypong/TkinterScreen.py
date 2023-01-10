@@ -10,6 +10,11 @@ except ImportError:
 from GameConstants import *
 
 
+TK_KEY_ID_GENERIC_KEY = '<Key>'
+TK_KEY_ID_SPACE = '<space>'
+TK_KEY_ID_ESCAPE = '<Escape>'
+
+
 class TkinterScreen:
 
     def __init__(self, gameloop_fn, field, paddle_height, paddle_width, player_one_color, player_two_color):
