@@ -1,13 +1,4 @@
-try:  # Python 3
-    from tkinter import *  
-except ImportError:
-    try:  # Python 2
-        from Tkinter import *  
-    except ImportError:  # Tkinter not installed...
-        raise ImportError("This program requires Tkinter, please make sure you have it installed.")
-
 import random
-
 
 from GameConstants import *
 from Player.Paddle import PAD_WIDTH, HALF_PAD_WIDTH, PAD_HEIGHT, HALF_PAD_HEIGHT
@@ -165,16 +156,15 @@ def new_game():
 
 
 def restart(event):
-    global root, running
+    global screen, running
     if running:
         new_game()
     else:
-        root.destroy()
+        screen.quit_game()
 
 
-def gameloop():
-    global root, running
-    root.after(1000 // 60, gameloop)
+def update_game():
+    global running
     if running:
         update_paddles()
         update_ball()
@@ -182,35 +172,23 @@ def gameloop():
 
 
 # Initializations
-root = Tk()
-root.title(GAME_TITLE)
-
-# place game window in a nice position on screen
-screen_width = root.winfo_screenwidth()
-screen_height = root.winfo_screenheight()
-root.geometry("+" + str(screen_width // 4) + "+" + str(screen_height // 4))  # using only offsets from left and top
-
 
 # Field and screen
 field = Field(WIDTH, HEIGHT, FIELD_COLOR, FIELD_COLOR_LINES, PAD_WIDTH)
-screen = TkinterScreen(root, field, PAD_HEIGHT, PAD_WIDTH, PLAYER_ONE_COLOR, PLAYER_TWO_COLOR)
-
+screen = TkinterScreen(update_game, field, PAD_HEIGHT, PAD_WIDTH, PLAYER_ONE_COLOR, PLAYER_TWO_COLOR)
 
 # Info
 screen.set_instructions_message(INFO_STRING)
 
-
 # Ball
 ball = Ball(field.width() / 2, field.height() / 2, 1, 1, BALL_RADIUS)
 screen.create_ball_object(ball, BALL_COLOR)
-
 
 # Players
 player_one = Player(_new_base_paddle(), StrategyHumanPlayer(PLAYER_ONE))
 player_two = Player(_new_base_paddle(), StrategySimpleComputerPlayer(PLAYER_TWO))
 screen.create_left_paddle_object(player_one.paddle())
 screen.create_right_paddle_object(player_two.paddle())
-
 
 # Game state
 game_state = GameState()
@@ -227,16 +205,14 @@ game_state.paddle_height = PAD_HEIGHT
 # Game control
 running = False
 
-
 # User input
-root.bind('<Key>', keydown)
-root.bind('<space>', pause)
-root.bind('<Escape>', restart)
+screen.bind_key('<Key>', keydown)
+screen.bind_key('<space>', pause)
+screen.bind_key('<Escape>', restart)
 
 
 # Start game loop
 new_game()
-gameloop()
 
 # Start main loop
-root.mainloop()
+screen.start_game()

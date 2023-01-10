@@ -7,9 +7,16 @@ except ImportError:
         raise ImportError("This program requires Tkinter, please make sure you have it installed.")
 
 
+from GameConstants import *
+
+
 class TkinterScreen:
 
-    def __init__(self, root_element, field, paddle_height, paddle_width, player_one_color, player_two_color):
+    def __init__(self, gameloop_fn, field, paddle_height, paddle_width, player_one_color, player_two_color):
+        self._root_element = self._build_root_element()
+
+        self._gameloop_callback = gameloop_fn
+
         self._field = field 
         self._width = field.width()
         self._height = field.height()
@@ -18,7 +25,7 @@ class TkinterScreen:
         self._player_one_color = player_one_color
         self._player_two_color = player_two_color
 
-        self._canvas = Canvas(root_element, width=self._width, height=self._height, bg=field.color())
+        self._canvas = Canvas(self._root_element, width=self._width, height=self._height, bg=field.color())
         self._canvas.pack()
 
         self._ball = None 
@@ -29,6 +36,16 @@ class TkinterScreen:
         self._score_right = self._create_score_right_display() 
 
         self._draw_field_lines()
+
+    def bind_key(self, key_id, callback_fun):
+        self._root_element.bind(key_id, callback_fun)
+
+    def start_game(self):
+        self._gameloop()
+        self._root_element.mainloop()
+
+    def quit_game(self):
+        self._root_element.destroy()
 
     def set_instructions_message(self, message):
         self._canvas.itemconfigure(self._instructions_display, text=message)
@@ -64,6 +81,21 @@ class TkinterScreen:
     def draw_right_paddle(self, paddle):
         half_pad_width = self._paddle_width / 2
         self._canvas.coords(self._paddle_right, self._width - half_pad_width, paddle.topmost(), self._width - half_pad_width, paddle.bottommost())
+
+    def _build_root_element(self):
+        root = Tk()
+        root.title(GAME_TITLE)
+
+        # place game window in a nice position on screen
+        screen_width = root.winfo_screenwidth()
+        screen_height = root.winfo_screenheight()
+        root.geometry("+" + str(screen_width // 4) + "+" + str(screen_height // 4))  # using only offsets from left and top
+
+        return root
+
+    def _gameloop(self):
+        self._root_element.after(1000 // 60, self._gameloop)
+        self._gameloop_callback()
 
     def _draw_field_lines(self):
         width = self._width
