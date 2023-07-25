@@ -20,6 +20,14 @@ To maintain compatibility with Python 2, all subfolders of main folder containin
 
 Most classes contain a test suite associated with them, on a file with prefix `test_`. All tests can be executed by simply running `pytest` while on the main folder of the project, assuming that pytest is installed. For more info, check section on libraries and frameworks being used. Although the game currently works on Python 2, automated tests will only be maintained for Python 3.
 
+## Development history
+
+The game was originally made as a mini-project on [An Introduction to Interactive Programming in Python](https://www.coursera.org/learn/interactive-python-1), circa 2017. That course uses the online tool CodeSkulptor, which has a GUI module specific for its didactic purposes, so the version in this repository has been adapted to use Tkinter instead.
+
+Given the specific state of CodeSkulptor back then, the entire project was written on a single file. The code is being progressively broken into several files since its migration from there. It is also being refactored into an object-oriented project, since it was originally very procedural in nature. Until this process is finished, expect remnants of non-OO code here and there. :)
+
+With regards to gameplay differences from the requirements of the course, the only difference is that the version here has the player going against the machine, while in the version specified for the course the player controls both paddles (the left one with W/S and the right one with the arrow keys).
+
 ## Libraries and Frameworks
 
 For the GUI, the project uses [Tkinter](https://docs.python.org/3/library/tkinter.html).
