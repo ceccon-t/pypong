@@ -22,7 +22,7 @@ Pause the game by pressing the Space key, and restart by pressing Esc. Press Esc
 
 The instructions are also always displayed on the screen.
 
-## How to Run
+## How to run
 
 From the root of the repository, navigate into pypong folder and run `pypong.py` with your installed Python executable. 
 
