@@ -20,6 +20,12 @@ To maintain compatibility with Python 2, all subfolders of main folder containin
 
 Most classes contain a test suite associated with them, on a file with prefix `test_`. All tests can be executed by simply running `pytest` while on the main folder of the project, assuming that pytest is installed. For more info, check section on libraries and frameworks being used. Although the game currently works on Python 2, automated tests will only be maintained for Python 3.
 
+## Continuous Integration
+
+The project uses Github Actions to run all automated tests whenever a new commit enters either the `main` or `dev` branches. The script that defines the workflow can be found under `.github/workflows/main-workflow.yml`.
+
+If any test is broken, the build fails and a red failure sign is displayed near the hash of the commit in the repository. If all tests pass, a green success sign is displayed instead.
+
 ## Development history
 
 The game was originally made as a mini-project on [An Introduction to Interactive Programming in Python](https://www.coursera.org/learn/interactive-python-1), circa 2017. That course uses the online tool CodeSkulptor, which has a GUI module specific for its didactic purposes, so the version in this repository has been adapted to use Tkinter instead.
@@ -33,4 +39,6 @@ With regards to gameplay differences from the requirements of the course, the on
 For the GUI, the project uses [Tkinter](https://docs.python.org/3/library/tkinter.html).
 
 For automated tests, the project uses [pytest](https://docs.pytest.org/en/7.1.x/getting-started.html).
+
+For continuous integration, the project uses [Github Actions](https://docs.github.com/en/actions/learn-github-actions).
 
