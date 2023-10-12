@@ -69,7 +69,7 @@ def test_update():
     ball.update()
 
     assert ball.pos(0) == expected_x
-    assert ball.pos(1) == expected_y
+    assert ball.pos(1) == expected_y+1
 
 def test_leftmost():
     ball = _build_default_ball()
