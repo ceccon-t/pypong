@@ -1,0 +1,17 @@
+name: Main workflow
+on:
+  push:
+    branches:
+      - main
+      - dev
+      - ga
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out source code
+        uses: actions/checkout@v3
+      - name: Install dependencies
+        run: pip install pytest
+      - name: Run tests
+        run: cd pypong && pytest
