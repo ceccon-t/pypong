@@ -1,5 +1,7 @@
 # PyPong
 
+![Build status](https://github.com/ceccon-t/pypong/actions/workflows/main-workflow.yml/badge.svg "Build status")
+
 ![Game paused](https://raw.githubusercontent.com/ceccon-t/pypong/main/images/Py-Pong-Sc0.png "Game paused")
 
 ## Description

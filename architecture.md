@@ -24,7 +24,7 @@ Most classes contain a test suite associated with them, on a file with prefix `t
 
 The project uses Github Actions to run all automated tests whenever a new commit enters either the `main` or `dev` branches. The script that defines the workflow can be found under `.github/workflows/main-workflow.yml`.
 
-If any test is broken, the build fails and a red failure sign is displayed near the hash of the commit in the repository. If all tests pass, a green success sign is displayed instead.
+If any test is broken, the build fails and a red failure sign is displayed near the hash of the commit in the repository. If all tests pass, a green success sign is displayed instead. A badge with the status of the last build for the main branch is also displayed in the Readme of the project.
 
 ## Development history
 
