@@ -1,8 +1,11 @@
-name: Main workflow
+name: Dev workflow
 on:
   push:
     branches:
       - dev
+    paths:
+      - 'pypong/**'
+      - '.github/workflows/dev-workflow.yml'
 jobs:
   test:
     runs-on: ubuntu-latest
